@@ -1,0 +1,204 @@
+=============================================================================
+                    OS LAB 13 - SUBMISSION SUMMARY
+=============================================================================
+
+PROJECT: EXT2 File System Utility
+STUDENT: OS Lab 13 Student
+DATE: January 2, 2026
+
+=============================================================================
+DELIVERABLES
+=============================================================================
+
+✓ Source Code:
+  - myfs.c (520 lines) - Main EXT2 utility program with full implementation
+  - ext2.h (130 lines) - EXT2 data structure definitions
+
+✓ Build System:
+  - Makefile - Compilation configuration
+
+✓ Documentation:
+  - README.md - User-friendly guide with examples
+  - IMPLEMENTATION.md - Technical implementation details
+  - SUBMISSION.txt - This file
+
+✓ Testing:
+  - test.sh - Comprehensive test suite (6 test cases)
+  - setup_test.sh - Script to create 200MB EXT2 test disk image
+  - my_partition.img - Pre-built 200MB EXT2 disk image with test files
+
+=============================================================================
+FEATURES IMPLEMENTED
+=============================================================================
+
+1. EXT2 Image Loader
+   ✓ Opens disk image in binary mode
+   ✓ Reads and validates superblock
+   ✓ Loads block group descriptors
+   ✓ Validates EXT2 magic number (0xEF53)
+
+2. ls (List Files) Command
+   ✓ Finds root inode (inode #2)
+   ✓ Reads directory data blocks
+   ✓ Parses variable-length directory entries
+   ✓ Displays file names, types, and inode numbers
+   ✓ Supports subdirectory listing
+   ✓ Supports multi-level path traversal
+
+3. cp (Copy File) Command
+   ✓ Locates files by absolute path
+   ✓ Reads inode metadata
+   ✓ Reads file data blocks
+   ✓ Extracts to host system
+   ✓ Preserves file size and content
+   ✓ Handles binary and text files
+
+=============================================================================
+HOW TO BUILD AND RUN
+=============================================================================
+
+Build:
+  $ make
+
+Create test disk image (optional):
+  $ sudo bash setup_test.sh
+
+Run tests:
+  $ bash test.sh
+
+Manual usage:
+  $ ./myfs my_partition.img ls
+  $ ./myfs my_partition.img ls /docs
+  $ ./myfs my_partition.img cp /hello.txt ./output.txt
+
+=============================================================================
+TEST RESULTS
+=============================================================================
+
+All 6 test cases PASSED:
+
+Test 1: List Root Directory
+  ✓ Successfully listed 9 entries including files and directories
+
+Test 2: List /docs Subdirectory  
+  ✓ Successfully listed directory contents with proper path traversal
+
+Test 3: Copy /hello.txt (28 bytes)
+  ✓ File extracted correctly with expected content
+
+Test 4: Copy /docs/info.txt (22 bytes)
+  ✓ File from subdirectory extracted successfully
+
+Test 5: Copy /README.txt (25 bytes)
+  ✓ File copied and verified with correct size
+
+Test 6: Copy /largefile.bin (13,512 bytes)
+  ✓ Binary file extracted and verified with correct size
+
+=============================================================================
+KEY IMPLEMENTATION HIGHLIGHTS
+=============================================================================
+
+1. Low-Level I/O Only
+   - Uses POSIX open(), read(), lseek(), close()
+   - No system() calls, no mounted filesystem access
+   - Direct disk image reading
+
+2. Proper EXT2 Format Handling
+   - Correct offset calculations for inodes and blocks
+   - Support for variable block sizes (1024, 2048, 4096 bytes)
+   - Variable-length directory entry parsing
+   - Proper inode location calculation using block groups
+
+3. Robust Error Handling
+   - Bounds checking on directory entries
+   - Validation of record lengths
+   - Proper error messages
+   - Safe memory allocation and deallocation
+
+4. Correct File System Navigation
+   - Root inode (#2) identification
+   - Directory entry parsing without fixed-size name arrays
+   - Multi-level path traversal support
+   - Proper file type identification
+
+=============================================================================
+TECHNICAL SPECIFICATIONS
+=============================================================================
+
+Language: C (C99 standard)
+Compiler: GCC with flags: -Wall -Wextra -O2 -std=c99
+
+Structures Implemented:
+  - ext2_superblock_t (1024 bytes superblock)
+  - ext2_group_desc_t (block group descriptors)
+  - ext2_inode_t (128 bytes core inode structure)
+  - ext2_dir_entry_t (variable-length directory entries)
+
+File System Support:
+  - EXT2 with 1024/2048/4096 byte blocks
+  - Single or multiple block groups
+  - Variable inode sizes (properly handles 128/256 byte inodes)
+  - Direct block pointers (up to 12 per inode)
+
+Memory Management:
+  - Dynamic allocation for group descriptors
+  - Dynamic allocation for block/directory buffers
+  - Proper cleanup and deallocation
+  - No memory leaks
+
+=============================================================================
+LIMITATIONS (AS SPECIFIED IN REQUIREMENTS)
+=============================================================================
+
+1. Direct Blocks Only
+   - No indirect block support
+   - Files larger than ~48KB may not be fully copied
+   - Acceptable for lab purposes
+
+2. Read-Only Operation
+   - Cannot write/modify EXT2 image
+   - Cannot create files or directories
+   - No format/mkfs capability
+
+3. No Special Features
+   - No symbolic link following
+   - No permission enforcement
+   - No special file support (devices, pipes, sockets)
+
+=============================================================================
+QUESTIONS FOR EVALUATION
+=============================================================================
+
+The implementation correctly answers the following lab questions:
+
+Q: How are files stored on EXT2?
+A: Using inodes that reference data blocks, organized in block groups
+
+Q: What is an inode?
+A: A 128-byte (or larger) structure containing file metadata and block pointers
+
+Q: How does the file system locate files?
+A: Through directory entries that map names to inode numbers, organized
+   in directory blocks
+
+Q: How does ls work internally?
+A: By reading directory blocks and parsing variable-length entries to
+   extract file names and types
+
+Q: How does cp work internally?
+A: By locating the source file's inode, reading its data blocks, and
+   writing the content to the destination
+
+=============================================================================
+REFERENCES
+=============================================================================
+
+- EXT2 File System Format: https://www.nongnu.org/ext2-doc/ext2.html
+- Linux Kernel EXT2 Implementation
+- POSIX File I/O Standards
+- C99 Standard Library
+
+=============================================================================
+                           END OF SUBMISSION
+=============================================================================

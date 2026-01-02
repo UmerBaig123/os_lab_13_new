@@ -1,0 +1,1 @@
+Hello from EXT2 filesystem!
